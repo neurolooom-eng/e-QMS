@@ -9,6 +9,7 @@ import { DataTable } from '../components/table/DataTable'
 import { KpiCard } from '../components/charts/KpiCard'
 import { ChartCard } from '../components/charts/ChartCard'
 import { RecordDrawer } from '../components/RecordDrawer'
+import { Capa8DForm } from '../components/capa/Capa8DForm'
 import { Icon } from '../components/ui/Icon'
 import type { QmsRecord } from '../lib/types'
 
@@ -101,19 +102,32 @@ export function ModulePage() {
         />
       )}
 
-      {editing !== undefined && (
-        <RecordDrawer
-          schema={schema}
-          record={editing}
-          nextRecordId={nextRecordId}
-          users={userNames}
-          currentUser={user?.name || 'unknown'}
-          canEdit={can('edit')}
-          canDelete={can('delete')}
-          onClose={() => setEditing(undefined)}
-          onSaved={reload}
-        />
-      )}
+      {editing !== undefined &&
+        (schema.slug === 'capa' ? (
+          <Capa8DForm
+            schema={schema}
+            record={editing}
+            nextRecordId={nextRecordId}
+            users={userNames}
+            currentUser={user?.name || 'unknown'}
+            canEdit={can('edit')}
+            canDelete={can('delete')}
+            onClose={() => setEditing(undefined)}
+            onSaved={reload}
+          />
+        ) : (
+          <RecordDrawer
+            schema={schema}
+            record={editing}
+            nextRecordId={nextRecordId}
+            users={userNames}
+            currentUser={user?.name || 'unknown'}
+            canEdit={can('edit')}
+            canDelete={can('delete')}
+            onClose={() => setEditing(undefined)}
+            onSaved={reload}
+          />
+        ))}
     </div>
   )
 }

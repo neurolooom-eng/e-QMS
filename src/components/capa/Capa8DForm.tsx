@@ -10,7 +10,7 @@ import clsx from 'clsx'
 import { db } from '../../lib/data'
 import { genId } from '../../lib/seed'
 import { logAudit } from '../../lib/audit'
-import { severityOptions, departments, ventilatorProducts } from '../../lib/modules/common'
+import { departments, ventilatorProducts } from '../../lib/modules/common'
 import type { ModuleSchema, QmsRecord } from '../../lib/types'
 
 // ============================================================
@@ -118,15 +118,30 @@ function blank8D(): EightD {
 }
 
 const DISCIPLINES = [
-  { n: 'D1', title: 'Team Formation', desc: 'Define the cross-functional team responsible for this CAPA', tag: 'Required' },
-  { n: 'D2', title: 'Problem Description', desc: 'Define the problem using 5W2H — What, When, Where, Who, How, How Many', tag: 'Required' },
-  { n: 'D3', title: 'Containment Actions', desc: 'Immediate actions to contain the problem and protect the patient', tag: 'Required' },
-  { n: 'D4', title: 'Root Cause Analysis', desc: 'Identify & verify the root cause — 5-Why + RPN (S×O×D)', tag: 'Required' },
-  { n: 'D5', title: 'Permanent Corrective Actions', desc: 'Select & validate actions that address the verified root cause', tag: '' },
-  { n: 'D6', title: 'Implement & Validate', desc: 'Execute, document evidence, assess regulatory & quality impact', tag: '' },
-  { n: 'D7', title: 'Preventive Actions', desc: 'Systemic actions to prevent recurrence across similar products', tag: '' },
-  { n: 'D8', title: 'Closure, Effectiveness & Sign-off', desc: 'Verify effectiveness, sign and close the CAPA', tag: 'Closure' },
+  { n: 'D1', label: 'Team', title: 'Team Formation', desc: 'Define the cross-functional team responsible for this CAPA', tag: 'Required' },
+  { n: 'D2', label: 'Problem', title: 'Problem Description', desc: 'Define the problem using 5W2H — What, When, Where, Who, Why, How, How Many', tag: 'Required' },
+  { n: 'D3', label: 'Contain', title: 'Containment Actions', desc: 'Immediate actions to contain the problem and protect the customer', tag: 'Required' },
+  { n: 'D4', label: 'Root Cause', title: 'Root Cause Analysis', desc: 'Identify and verify the root cause using structured methods — 5-Why + RPN', tag: 'Required' },
+  { n: 'D5', label: 'Solutions', title: 'Permanent Corrective Actions — Selected Solutions', desc: 'Choose and validate corrective actions that address the verified root cause', tag: '' },
+  { n: 'D6', label: 'Correct', title: 'Implement & Validate Corrective Actions', desc: 'Execute, document evidence, and validate that actions are effective', tag: '' },
+  { n: 'D7', label: 'Prevent', title: 'Preventive Actions', desc: 'Systemic actions to prevent recurrence across similar products or processes', tag: '' },
+  { n: 'D8', label: 'Close', title: 'Closure, Effectiveness & Recognition', desc: 'Verify effectiveness, close the CAPA, recognise the team', tag: 'Closure' },
 ] as const
+
+// Priority wording per the 8D form, mapped to the register's severity tones.
+const PRIORITY_OPTIONS = [
+  'Critical — Patient Safety Risk',
+  'Major — Significant QMS Impact',
+  'Minor — Low Risk',
+]
+const PRIORITY_TO_SEVERITY: Record<string, string> = {
+  'Critical — Patient Safety Risk': 'Critical',
+  'Major — Significant QMS Impact': 'Serious',
+  'Minor — Low Risk': 'Minor',
+}
+function severityToPriority(sev?: string): string {
+  return Object.keys(PRIORITY_TO_SEVERITY).find((k) => PRIORITY_TO_SEVERITY[k] === sev) || ''
+}
 
 export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, canEdit, canDelete, onClose, onSaved }: Props) {
   const isNew = !record
@@ -156,6 +171,7 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
     type: record?.type || 'Corrective',
     source: record?.source || '',
     severity: record?.severity || '',
+    priority: record?.priority || severityToPriority(record?.severity),
     reference: record?.reference || record?.capaRef || '',
     department: record?.department || '',
     initiatedBy: record?.createdBy && record.createdBy !== 'system (seed)' ? record.createdBy : currentUser,
@@ -218,7 +234,8 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
       status,
       type: meta.type,
       source: meta.source,
-      severity: meta.severity,
+      severity: PRIORITY_TO_SEVERITY[meta.priority] || meta.severity,
+      priority: meta.priority,
       reference: meta.reference,
       department: meta.department,
       owner: form.teamLeader,
@@ -257,6 +274,12 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
     onSaved(); onClose()
   }
 
+  function clearForm() {
+    if (!confirm('Clear all form data?')) return
+    setForm(blank8D())
+    setMeta((m) => ({ ...m, title: '', source: '', priority: '', severity: '', reference: '' }))
+  }
+
   const capaNo = record?.recordId || nextRecordId
 
   return (
@@ -283,7 +306,9 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
             {DISCIPLINES.map((d, i) => (
               <button key={d.n} onClick={() => setOpen(new Set([i + 1]))} className="flex flex-1 flex-col items-center gap-1" title={`${d.n} ${d.title}`}>
                 <div className={clsx('h-[3px] w-full rounded', done[i] ? 'bg-primary' : open.has(i + 1) ? 'bg-primary/50' : 'bg-border')} />
-                <div className={clsx('font-mono text-[9px]', done[i] || open.has(i + 1) ? 'text-primary' : 'text-muted')}>{d.n}</div>
+                <div className={clsx('truncate font-mono text-[9px]', done[i] || open.has(i + 1) ? 'text-primary' : 'text-muted')}>
+                  {d.n}<span className="hidden md:inline"> {d.label}</span>
+                </div>
               </button>
             ))}
           </div>
@@ -305,7 +330,7 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
               <div className="text-[11px] text-muted">Eight Disciplines · Corrective &amp; Preventive Action</div>
             </div>
             <div className="border-t border-border p-4 text-right md:border-l md:border-t-0">
-              <DhLabel>CAPA No.</DhLabel><DhVal>{capaNo}</DhVal>
+              <DhLabel>Form No.</DhLabel><DhVal>EQMS-CAPA-8D-001</DhVal>
               <DhLabel className="mt-2">Effective Date</DhLabel><DhVal>{meta.initDate || today}</DhVal>
             </div>
           </div>
@@ -327,10 +352,10 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
               </select>
             </MetaCell>
             <MetaCell label="Reference No."><input className="meta-in" placeholder="NCR / Complaint / Audit" value={meta.reference} onChange={(e) => setMetaK('reference', e.target.value)} disabled={!canEdit} /></MetaCell>
-            <MetaCell label="Priority / Severity">
-              <select className="meta-in" value={meta.severity} onChange={(e) => setMetaK('severity', e.target.value)} disabled={!canEdit}>
+            <MetaCell label="Priority">
+              <select className="meta-in" value={meta.priority} onChange={(e) => setMetaK('priority', e.target.value)} disabled={!canEdit}>
                 <option value="">— Select —</option>
-                {severityOptions.map((o) => <option key={o.value}>{o.value}</option>)}
+                {PRIORITY_OPTIONS.map((o) => <option key={o}>{o}</option>)}
               </select>
             </MetaCell>
           </MetaStrip>
@@ -405,6 +430,7 @@ export function Capa8DForm({ schema, record, nextRecordId, users, currentUser, c
         <div className="flex items-center gap-2 border-t border-border bg-surface px-5 py-3">
           <div className="flex-1 font-mono text-[10px] text-muted">8D Disciplines complete: <strong className="text-text">{done.filter(Boolean).length}/8</strong></div>
           <button className="btn-outline" onClick={() => window.print()}><Printer className="mr-1 h-4 w-4" /> Print / PDF</button>
+          {canEdit && <button className="btn-outline" onClick={clearForm}>Clear Form</button>}
           <button className="btn-outline" onClick={onClose}>Cancel</button>
           {canEdit && <button className="btn-primary" onClick={() => save(true)} disabled={saving}>{saving ? 'Saving…' : 'Submit CAPA →'}</button>}
         </div>
@@ -473,8 +499,8 @@ function D1({ form, set, disabled, users }: DProps & { users: string[] }) {
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {form.members.map((m, i) => (
-          <Field key={i} label={`Member ${i + 1} — Name / Dept`}>
-            <input className="input" value={m.name} onChange={(e) => set('members', form.members.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} disabled={disabled} placeholder="Name / Department" />
+          <Field key={i} label={`Member ${i + 1} — Department`}>
+            <input className="input" value={m.name} onChange={(e) => set('members', form.members.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} disabled={disabled} placeholder="Name / Dept" />
           </Field>
         ))}
       </div>
@@ -496,12 +522,12 @@ function D2({ form, set, disabled }: DProps) {
         <textarea className="textarea min-h-[56px]" value={form.problemStatement} onChange={(e) => set('problemStatement', e.target.value)} disabled={disabled} placeholder="Concise one-paragraph problem statement…" />
       </Field>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {w('what', 'What — defect / failure?', 'Describe the nonconformance…')}
-        {w('when', 'When — detected?', 'Date, time, process stage…')}
-        {w('where', 'Where — occurred?', 'Process step, line, location…')}
-        {w('who', 'Who — detected / affected?', 'Operator, clinician, patient…')}
-        {w('how', 'How — detected?', 'Inspection, complaint, audit…')}
-        {w('howMany', 'How Many — quantity / scope', 'Units, lots, frequency…')}
+        {w('what', 'What — What is the defect/failure?', 'Describe the nonconformance or failure…')}
+        {w('when', 'When — When was it detected?', 'Date, time, process stage…')}
+        {w('where', 'Where — Where did it occur?', 'Process step, machine, location…')}
+        {w('who', 'Who — Who detected / is affected?', 'Operator, customer, end user…')}
+        {w('how', 'How — How was it detected?', 'Inspection, complaint, audit…')}
+        {w('howMany', 'How Many — Quantity / Scope', 'Units affected, lots, frequency…')}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Affected Product / Device">
@@ -612,7 +638,7 @@ function D4({ form, set, disabled, rpn, rpnTone }: DProps & { rpn: number; rpnTo
         {form.whys.map((w, i) => (
           <div key={i} className="flex items-center gap-2.5">
             <span className="grid h-6 w-6 flex-shrink-0 place-items-center rounded-full border border-primary bg-primary/15 text-[11px] font-bold text-primary">{i + 1}</span>
-            <input className="input" value={w} onChange={(e) => set('whys', form.whys.map((x, j) => (j === i ? e.target.value : x)))} disabled={disabled} placeholder={i === 0 ? 'Why did the problem occur?' : i === 4 ? 'Root cause — Why? (answer to Why 4)' : `Why? (answer to Why ${i})`} />
+            <input className="input" value={w} onChange={(e) => set('whys', form.whys.map((x, j) => (j === i ? e.target.value : x)))} disabled={disabled} placeholder={i === 0 ? 'Why did the problem occur?' : i === 4 ? 'Root Cause identified — Why? (answer to Why 4)' : `Why? (answer to Why ${i})`} />
           </div>
         ))}
       </div>

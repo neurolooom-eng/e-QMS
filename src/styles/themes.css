@@ -1,0 +1,109 @@
+/* ============================================================
+   e-QMS Theme System
+   Each theme sets semantic CSS variables as "R G B" channels so
+   Tailwind's rgb(var(--c-*) / <alpha>) opacity utilities work.
+   Switch by setting <html data-theme="...">.
+   ============================================================ */
+
+:root,
+[data-theme='clinical-light'] {
+  --c-bg: 241 245 249;        /* slate-100 */
+  --c-surface: 255 255 255;
+  --c-surface-2: 248 250 252;
+  --c-border: 226 232 240;
+  --c-text: 15 23 42;         /* slate-900 */
+  --c-muted: 100 116 139;     /* slate-500 */
+  --c-primary: 13 148 136;    /* teal-600 — clinical */
+  --c-primary-fg: 255 255 255;
+  --c-accent: 14 116 144;     /* cyan-700 */
+  --c-success: 22 163 74;
+  --c-warning: 217 119 6;
+  --c-danger: 220 38 38;
+  --c-info: 2 132 199;
+  color-scheme: light;
+}
+
+[data-theme='clinical-dark'] {
+  --c-bg: 2 6 23;             /* slate-950 */
+  --c-surface: 15 23 42;      /* slate-900 */
+  --c-surface-2: 30 41 59;    /* slate-800 */
+  --c-border: 51 65 85;       /* slate-700 */
+  --c-text: 226 232 240;
+  --c-muted: 148 163 184;
+  --c-primary: 45 212 191;    /* teal-400 */
+  --c-primary-fg: 4 47 46;
+  --c-accent: 34 211 238;
+  --c-success: 74 222 128;
+  --c-warning: 251 191 36;
+  --c-danger: 248 113 113;
+  --c-info: 56 189 248;
+  color-scheme: dark;
+}
+
+[data-theme='ocean'] {
+  --c-bg: 240 249 255;        /* sky-50 */
+  --c-surface: 255 255 255;
+  --c-surface-2: 240 249 255;
+  --c-border: 186 230 253;
+  --c-text: 12 74 110;        /* sky-900 */
+  --c-muted: 71 85 105;
+  --c-primary: 2 132 199;     /* sky-600 */
+  --c-primary-fg: 255 255 255;
+  --c-accent: 8 145 178;
+  --c-success: 5 150 105;
+  --c-warning: 202 138 4;
+  --c-danger: 225 29 72;
+  --c-info: 14 165 233;
+  color-scheme: light;
+}
+
+[data-theme='midnight'] {
+  --c-bg: 8 11 30;
+  --c-surface: 17 24 51;
+  --c-surface-2: 27 36 71;
+  --c-border: 45 56 100;
+  --c-text: 224 231 255;      /* indigo-100 */
+  --c-muted: 148 163 211;
+  --c-primary: 129 140 248;   /* indigo-400 */
+  --c-primary-fg: 12 16 40;
+  --c-accent: 56 189 248;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-danger: 251 113 133;
+  --c-info: 96 165 250;
+  color-scheme: dark;
+}
+
+[data-theme='emerald'] {
+  --c-bg: 236 253 245;
+  --c-surface: 255 255 255;
+  --c-surface-2: 240 253 244;
+  --c-border: 187 247 208;
+  --c-text: 6 78 59;
+  --c-muted: 71 85 105;
+  --c-primary: 5 150 105;     /* emerald-600 */
+  --c-primary-fg: 255 255 255;
+  --c-accent: 13 148 136;
+  --c-success: 22 163 74;
+  --c-warning: 217 119 6;
+  --c-danger: 220 38 38;
+  --c-info: 2 132 199;
+  color-scheme: light;
+}
+
+[data-theme='contrast'] {
+  --c-bg: 255 255 255;
+  --c-surface: 255 255 255;
+  --c-surface-2: 245 245 245;
+  --c-border: 0 0 0;
+  --c-text: 0 0 0;
+  --c-muted: 60 60 60;
+  --c-primary: 0 0 0;
+  --c-primary-fg: 255 255 255;
+  --c-accent: 0 0 153;
+  --c-success: 0 102 0;
+  --c-warning: 153 76 0;
+  --c-danger: 178 0 0;
+  --c-info: 0 0 153;
+  color-scheme: light;
+}

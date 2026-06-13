@@ -1,0 +1,61 @@
+@import './themes.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg text-text antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  * {
+    border-color: rgb(var(--c-border));
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
+           transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-primary-fg hover:opacity-90;
+  }
+  .btn-ghost {
+    @apply btn text-text hover:bg-surface-2;
+  }
+  .btn-outline {
+    @apply btn border border-border bg-surface text-text hover:bg-surface-2;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white hover:opacity-90;
+  }
+  .card {
+    @apply rounded-xl border border-border bg-surface shadow-card;
+  }
+  .input,
+  .select,
+  .textarea {
+    @apply w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-text
+           outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/30;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-muted;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { height: 10px; width: 10px; }
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-border));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track { background: transparent; }
